@@ -58,7 +58,7 @@ def cached_property(getter):
 
 
 def expand_resource_path(path):
-    directory = dirname(sys.modules["sumy"].__file__)
+    directory = dirname(sys.modules["faster_sumy"].__file__)
     directory = abspath(directory)
     return join(directory, to_string("data"), to_string(path))
 
@@ -66,7 +66,7 @@ def expand_resource_path(path):
 def get_stop_words(language):
     language = normalize_language(language)
     try:
-        stopwords_data = pkgutil.get_data("sumy", "data/stopwords/%s.txt" % language)
+        stopwords_data = pkgutil.get_data("faster_sumy", "data/stopwords/%s.txt" % language)
     except IOError as e:
         raise LookupError("Stop-words are not available for language %s." % language)
     return parse_stop_words(stopwords_data)
