@@ -24,7 +24,7 @@ if VERSION_SUFFIX == "3.4":  # lxml 4.4.0 dropped support for Python 3.4
 
 # https://blog.ionelmc.ro/presentations/packaging/
 setup(
-    name="sumy",
+    name="faster_sumy",
     version="0.10.0",
     description="Module for automatic summarization of text documents and HTML pages.",
     long_description=long_description,
@@ -64,10 +64,10 @@ setup(
     ]},
     entry_points={
         "console_scripts": [
-            "sumy = sumy.__main__:main",
-            "sumy-%s = sumy.__main__:main" % VERSION_SUFFIX,
-            "sumy_eval = sumy.evaluation.__main__:main",
-            "sumy_eval-%s = sumy.evaluation.__main__:main" % VERSION_SUFFIX,
+            "faster_sumy = sumy.__main__:main",
+            "faster_sumy-%s = sumy.__main__:main" % VERSION_SUFFIX,
+            "faster_sumy_eval = sumy.evaluation.__main__:main",
+            "faster_sumy_eval-%s = sumy.evaluation.__main__:main" % VERSION_SUFFIX,
         ],
     },
     classifiers=[
