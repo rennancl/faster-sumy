@@ -59,7 +59,7 @@ setup(
         "Greek": ["greek-stemmer-pos"],
     },
     packages=find_packages(),
-    package_data={"sumy": [
+    package_data={"faster_sumy": [
         "data/stopwords/*.txt",
     ]},
     entry_points={
