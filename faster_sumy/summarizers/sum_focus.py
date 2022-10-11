@@ -30,7 +30,7 @@ class SumFocusSummarizer(AbstractSummarizer):
         return self._get_best_sentences(document.sentences, sentences_count, ratings)
 
     def _get_all_words_in_doc(self, sentences):
-        return self._stem_words([w for s in sentences for w in s.words])
+        return self._normalize_words([w for s in sentences for w in s.words])
 
     def _get_content_words_in_sentence(self, sentence):
         normalized_words = self._normalize_words(sentence.words)
