@@ -33,14 +33,11 @@ class SumBasicSummarizer(AbstractSummarizer):
     def _get_content_words_in_sentence(self, sentence):
         normalized_words = self._normalize_words(sentence.words)
         normalized_content_words = self._filter_out_stop_words(normalized_words)
-        stemmed_normalized_content_words = self._stem_words(normalized_content_words)
+        stemmed_normalized_content_words = self._normalize_words(normalized_content_words)
         return stemmed_normalized_content_words
 
-    def _stem_words(self, words):
-        return [self.stem_word(w) for w in words]
-
     def _normalize_words(self, words):
-        return [self.normalize_word(w) for w in words]
+        return [self.stem_word(self.normalize_word(w)) for w in words]
 
     def _filter_out_stop_words(self, words):
         return [w for w in words if w not in self.stop_words]
