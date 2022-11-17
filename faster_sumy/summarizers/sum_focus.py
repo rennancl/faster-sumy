@@ -5,7 +5,7 @@ from __future__ import division, print_function, unicode_literals
 
 import re
 
-from ._summarizer import AbstractSummarizer
+from faster_sumy.summarizers._summarizer import AbstractSummarizer
 
 class SumFocusSummarizer(AbstractSummarizer):
     """
@@ -14,7 +14,9 @@ class SumFocusSummarizer(AbstractSummarizer):
     Source: http://www.cis.upenn.edu/~nenkova/papers/ipm.pdf
     """
     _stop_words = frozenset()
-    _lambda = 0.9
+    __lambda = 0.9
+    _diversity = "default"
+    _volume = 1
 
     @property
     def stop_words(self):
@@ -23,6 +25,30 @@ class SumFocusSummarizer(AbstractSummarizer):
     @stop_words.setter
     def stop_words(self, words):
         self._stop_words = frozenset(map(self.normalize_word, words))
+        
+    @property
+    def _lambda(self):
+        return self.__lambda
+
+    @_lambda.setter
+    def _lambda(self, _lambda):
+        self.__lambda = _lambda
+
+    @property
+    def diversity(self):
+        return self._diversity
+
+    @diversity.setter
+    def diversity(self, div):
+        self._diversity = div      
+        
+    @property
+    def volume(self):
+        return self._volume
+
+    @volume.setter
+    def volume(self, vol):
+        self._volume = vol     
 
     def __call__(self, document, sentences_count, query):
         sentences = document.sentences
@@ -73,23 +99,32 @@ class SumFocusSummarizer(AbstractSummarizer):
         content_words = self._get_all_content_words_in_doc(sentences)
         content_words_count = len(content_words)
         content_words_freq = self._compute_word_freq(content_words)
-        content_word_tf = dict((k, (v / content_words_count) *(1 - self._lambda) + self._lambda * int(k in query_words)) for (k, v) in content_words_freq.items())
+        content_word_tf = dict((k, (v / content_words_count) *(1 + self._lambda * int(k in query_words))) for (k, v) in content_words_freq.items())
         return content_word_tf
 
-    @staticmethod
-    def _compute_average_probability_of_words(word_freq_in_doc, content_words_in_sentence):
+    def _compute_average_probability_of_words(self, word_freq_in_doc, content_words_in_sentence):
         content_words_count = len(content_words_in_sentence)
         if content_words_count > 0:
             word_freq_sum = sum([word_freq_in_doc[w] for w in content_words_in_sentence])
-            word_freq_avg = word_freq_sum / content_words_count
+            word_freq_avg = word_freq_sum / pow(content_words_count, self.volume)
             return word_freq_avg
         else:
             return 0
 
-    @staticmethod
-    def _update_tf(word_freq, words_to_update):
+    def _update_tf(self, word_freq, words_to_update):
         for w in words_to_update:
-            word_freq[w] *= word_freq[w] 
+            if self.diversity == "max":
+                # never select same word
+                word_freq[w] = -1
+            if self.diversity == "median":
+                # might select same word
+                word_freq[w] = 0
+            if self.diversity == "default":
+                # default diverisity
+                word_freq[w] *= word_freq[w] 
+            if self.diversity == "min":
+                # doesnt update word
+                word_freq[w] = word_freq[w] 
         return word_freq
 
     def _find_index_of_best_sentence(self, word_freq, sentences_as_words):
