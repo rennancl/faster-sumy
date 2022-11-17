@@ -5,7 +5,7 @@ from __future__ import division, print_function, unicode_literals
 
 import re
 
-from faster_sumy.summarizers._summarizer import AbstractSummarizer
+from ._summarizer import AbstractSummarizer
 
 class SumFocusSummarizer(AbstractSummarizer):
     """
