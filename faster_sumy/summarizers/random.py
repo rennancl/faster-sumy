@@ -19,6 +19,7 @@ class RandomSummarizer(AbstractSummarizer):
 
     def _get_random_ratings(self, sentences):
         ratings = list(range(len(sentences)))
+        random.seed(42)
         random.shuffle(ratings)
 
         return dict((s, r) for s, r in zip(sentences, ratings))
