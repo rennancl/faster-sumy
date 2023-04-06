@@ -14,7 +14,7 @@ class SumFocusSummarizer(AbstractSummarizer):
     Source: http://www.cis.upenn.edu/~nenkova/papers/ipm.pdf
     """
     _stop_words = frozenset()
-    __lambda = 0.9
+    __lambda = 1
     _diversity = "default"
     _volume = 1
 
@@ -99,7 +99,13 @@ class SumFocusSummarizer(AbstractSummarizer):
         content_words = self._get_all_content_words_in_doc(sentences)
         content_words_count = len(content_words)
         content_words_freq = self._compute_word_freq(content_words)
-        content_word_tf = dict((k, (v / content_words_count) *(1 + self._lambda * int(k in query_words))) for (k, v) in content_words_freq.items())
+        # content_word_tf = dict((k, (v / content_words_count) *(1 + self._lambda * int(k in query_words))) for (k, v) in content_words_freq.items())
+        content_word_tf = {}
+        for (k, v) in content_words_freq.items():
+            if k in query_words:
+                content_word_tf[k] = (v / content_words_count) * (1 - self._lambda) + self._lambda
+            else:
+                content_word_tf[k] = (v / content_words_count)
         return content_word_tf
 
     def _compute_average_probability_of_words(self, word_freq_in_doc, content_words_in_sentence):
