@@ -89,24 +89,45 @@ class SumFocusSummarizer(AbstractSummarizer):
         normalized_query_words = self._normalize_words(query_words)
         return normalized_query_words
     
+    # def _compute_tf(self, sentences, query):
+    #     """
+    #     Computes the normalized term frequency as explained in http://www.tfidf.com/
+    #     """
+    #     # tratar palavras aqui
+    #     query_words = self._get_query_words(query)
+        
+    #     content_words = self._get_all_content_words_in_doc(sentences)
+    #     content_words_count = len(content_words)
+    #     content_words_freq = self._compute_word_freq(content_words)
+    #     # content_word_tf = dict((k, (v / content_words_count) *(1 + self._lambda * int(k in query_words))) for (k, v) in content_words_freq.items())
+    #     content_word_tf = {}
+    #     for (k, v) in content_words_freq.items():
+    #         if k in query_words:
+    #             content_word_tf[k] = (v / content_words_count) * (1 - self._lambda) + self._lambda
+    #         else:
+    #             content_word_tf[k] = (v / content_words_count)
+    #     return content_word_tf
     def _compute_tf(self, sentences, query):
         """
         Computes the normalized term frequency as explained in http://www.tfidf.com/
         """
         # tratar palavras aqui
         query_words = self._get_query_words(query)
-        
+
         content_words = self._get_all_content_words_in_doc(sentences)
         content_words_count = len(content_words)
         content_words_freq = self._compute_word_freq(content_words)
-        # content_word_tf = dict((k, (v / content_words_count) *(1 + self._lambda * int(k in query_words))) for (k, v) in content_words_freq.items())
+
+        query_words_count = len(query_words)
+        query_words_freq = self._compute_word_freq(query_words)
+
         content_word_tf = {}
         for (k, v) in content_words_freq.items():
-            if k in query_words:
-                content_word_tf[k] = (v / content_words_count) * (1 - self._lambda) + self._lambda
-            else:
-                content_word_tf[k] = (v / content_words_count)
+            content_word_tf[k] = (v / content_words_count) * (1 - self._lambda) + self._lambda * (query_words_freq.get(k, 0) / query_words_count)
+            # content_word_tf[k] = (v / content_wordss_count) * (1 - self._lambda) + self._lambda * min(query_words_freq.get(k, 0), 1)
+            # content_word_tf[k] = max(query_words_freq.get(k, 0) * self._lambda, (v / content_words_count))
         return content_word_tf
+
 
     def _compute_average_probability_of_words(self, word_freq_in_doc, content_words_in_sentence):
         content_words_count = len(content_words_in_sentence)
@@ -119,18 +140,7 @@ class SumFocusSummarizer(AbstractSummarizer):
 
     def _update_tf(self, word_freq, words_to_update):
         for w in words_to_update:
-            if self.diversity == "max":
-                # never select same word
-                word_freq[w] = -1
-            if self.diversity == "median":
-                # might select same word
-                word_freq[w] = 0
-            if self.diversity == "default":
-                # default diverisity
-                word_freq[w] *= word_freq[w] 
-            if self.diversity == "min":
-                # doesnt update word
-                word_freq[w] = word_freq[w] 
+            word_freq[w] = pow(word_freq[w], self.diversity)
         return word_freq
 
     def _find_index_of_best_sentence(self, word_freq, sentences_as_words):
